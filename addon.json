@@ -1,0 +1,11 @@
+{
+  "title"   :  "Jedi Force Tool",
+  "type"    :  "tool",
+  "tags"    :  [ "fun", "build" ],
+  "ignore"  :
+  [
+    "*.psd",
+    "*.vcproj",
+    "*.svn*"
+  ]
+}
