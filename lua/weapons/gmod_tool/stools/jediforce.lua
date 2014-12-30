@@ -7,16 +7,28 @@ TOOL.RightClickAutomatic = true
 
 TOOL.ClientConVar =
 {
+  [ "movemap" ]           = 0,
+  [ "axislen" ]           = 30,
+  [ "enablecs" ]          = 1,
+  [ "storeposkey" ]       = "",
   [ "forceamount" ]       = 500,
+  [ "forcemcapply" ]      = 0,
   [ "forcemaxdistance" ]  = 500,
   [ "forcemassrelative" ] = 0,
-  [ "forcedistrelative" ] = 1,
-  [ "forcemcapply" ]      = 0,
-  [ "enablecs" ]          = 1,
-  [ "axislen" ]           = 30
+  [ "forcedistrelative" ] = 1
 }
 
+local cvX = 1
+local cvY = 2
+local cvZ = 3
 
+local GetConVarString = GetConVarString
+local surface = surface
+local string = string
+local RunConsoleCommand = RunConsoleCommand
+local LocalPlayer = LocalPlayer
+
+local SavedLocations = {}
 
 function ApplyJediForce(oSelf,stTrace,vVec)
   local oEnt = stTrace.Entity
@@ -46,7 +58,6 @@ function ApplyJediForce(oSelf,stTrace,vVec)
     end
   end
 end
-
 
 if CLIENT then
   language.Add("tool.jediforce.name", "Jedi Force Tool")
@@ -140,6 +151,9 @@ function TOOL:Reload( Trace )
   local oPly = self:GetOwner()
   local oEnt = Trace.Entity
   if(oEnt and oEnt:IsValid()) then
+    local movemap = self:GetClientNumber("movemap") or 0
+    local class = oEnt:GetClass()
+    if(class ~= "prop_physics" and movemap == 0) then return end
     if(oEnt:GetPhysicsObject():IsValid()) then
       -- A jedi cant grab the map ...
       local vAim = oPly:GetAimVector()
@@ -152,9 +166,33 @@ function TOOL:Reload( Trace )
       oEnt:SetPos(oPly:GetPos()+vAim+Vector(0,0,45))
     end
   elseif(Trace.HitWorld) then
-    oPly:SetPos(Trace.HitPos + 20 * Trace.HitNormal)
+    local cmd = oPly:GetCurrentCommand()
+    local spd = cmd:KeyDown(IN_SPEED) 
+    local use = cmd:KeyDown(IN_USE)
+    local storeposkey = self:GetClientInfo("storeposkey") or ""
+    if(use and string.len(storeposkey) > 0) then
+      local plPos = oPly:GetPos()
+      SavedLocations[storeposkey] = { plPos[cvX], plPos[cvY], plPos[cvZ]}
+      return true
+    elseif(spd and string.len(storeposkey) > 0 and SavedLocations[storeposkey]) then
+      local loc = SavedLocations[storeposkey]
+      local x = loc[cvX]
+      local y = loc[cvY]
+      local z = loc[cvZ]
+      if(x and y and z) then
+        oPly:SetVelocity(-oPly:GetVelocity())
+        oPly:SetPos(Vector(x,y,z))
+        return true
+      end
+      return false
+    elseif(not use and not spd) then
+      oPly:SetVelocity(-oPly:GetVelocity())
+      oPly:SetPos(Trace.HitPos + 20 * Trace.HitNormal)
+      return true
+    end
+    return true
   end
-  return true
+  return false
 end
 
 function TOOL.BuildCPanel( cPanel )
@@ -176,9 +214,39 @@ function TOOL.BuildCPanel( cPanel )
       [3] = "jediforce_forcedistrelative",
       [4] = "jediforce_forcemcapply",
       [5] = "jediforce_enablecs",
-      [6] = "jediforce_axislen"
+      [6] = "jediforce_axislen",
+      [7] = "jediforce_movemap"
     }
   })
+  
+  -- http://wiki.garrysmod.com/page/Category:DComboBox
+  local pTele = vgui.Create("DComboBox")
+        pTele:SetPos(2, CurY)
+        pTele:SetTall(18)
+        pTele:SetValue("<Select Position NAME>")
+        pTele.OnSelect = function( panel, index, value )
+          RunConsoleCommand("jediforce_storeposkey",value)
+        end
+  
+  local storeposkey = GetConVarString("jediforce_storeposkey") or ""
+  local pText = vgui.Create("DTextEntry")
+        pText:SetPos( 2, 300 )
+        pText:SetTall(18)
+        pText:SetText(storeposkey == "" and "Put location name > ENTER" or storeposkey)
+        pText.OnEnter = function( self )
+          local psKey = self:GetValue() or ""
+          local plPos = LocalPlayer():GetPos()
+          if(string.len(psKey) > 0) then
+            if(not SavedLocations[psKey]) then
+              pTele:AddChoice(psKey)
+            end
+            RunConsoleCommand("jediforce_storeposkey",psKey)
+            SavedLocations[psKey] = {plPos[cvX], plPos[cvY], plPos[cvZ]}
+          end
+        end
+  cPanel:AddItem(pText)
+  cPanel:AddItem(pTele)
+  
   cPanel:AddControl( "Slider",  {
       Label   = "#tool.jediforce.distance",
       Type    = "Float",
@@ -222,4 +290,10 @@ function TOOL.BuildCPanel( cPanel )
       Label       = "Enable Jedi's UCS Vision",
       Description = "",
       Command     = "jediforce_enablecs"})
+      
+  cPanel:AddControl("CheckBox",{
+      Label       = "Enable moving map props",
+      Description = "",
+      Command     = "jediforce_movemap"})      
+     
 end
