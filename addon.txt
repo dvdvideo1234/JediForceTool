@@ -1,0 +1,6 @@
+"AddonInfo"
+{
+  "name" "Jedi Force Tool"
+  "author_name" "DVD"
+  "info" "Saves annoying walking and stuff"
+}
