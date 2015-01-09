@@ -166,9 +166,8 @@ function TOOL:Reload( Trace )
       oEnt:SetPos(oPly:GetPos()+vAim+Vector(0,0,45))
     end
   elseif(Trace.HitWorld) then
-    local cmd = oPly:GetCurrentCommand()
-    local spd = cmd:KeyDown(IN_SPEED) 
-    local use = cmd:KeyDown(IN_USE)
+    local spd = oPly:KeyDown(IN_SPEED) 
+    local use = oPly:KeyDown(IN_USE)
     local storeposkey = self:GetClientInfo("storeposkey") or ""
     if(use and string.len(storeposkey) > 0) then
       local plPos = oPly:GetPos()
