@@ -194,7 +194,7 @@ function TOOL:Reload( Trace )
       if(Saved.JumpPower == -1) then
         Saved.JumpPower = ply:GetJumpPower()
       end
-      jumpower = math.Clamp(self:GetClientNumber("jumpower"),0,100000)
+      jumpower = math.Clamp(self:GetClientNumber("jumpower"),0,10000)
       ply:SetJumpPower(jumpower)
     elseif(not use and not spd and not duc) then
       ply:SetVelocity(-ply:GetVelocity())
@@ -293,7 +293,7 @@ function TOOL.BuildCPanel( cPanel )
       Label   = "#tool.jediforce.jumpower",
       Type    = "Float",
       Min     = 0,
-      Max     = 100000,
+      Max     = 10000,
       Command = "jediforce_jumpower",
       Description = "Sets the UCS axis length"})  
       
