@@ -1,0 +1,6 @@
+"AddonInfo"
+{
+  "name" "Jedi Force Tool"
+  "author_name" "DVD"
+  "info" "Transforms the player into a Jedi"
+}

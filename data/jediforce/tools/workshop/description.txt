@@ -1,0 +1,38 @@
+[img=https://i.imgur.com/2txEPIN.gif][/img]
+
+[h1] Description [/h1]
+Annoyed loosing time to walk or wander, this tool is just for you!
+Reload on an prop will bring it back to you, on world will teleport you to the hit position.
+Pointing to an entity shows its coordinate system, mass center OBB center and position.
+Pointing to the world shows world's coordinate system. No need to place a texture to see where
+is World X is anymore ! Mouse 1 / Mouse 2 to Push / pull a prop. The tool is coded in the most
+part for developers to be able to see the effect of applying forces and teleporting to see the effects.
+
+[h1] Feature List [/h1]
+[list]
+ [*] Explore the vast corners of every map by trace-teleporting
+ [*] Use the panel to store a location in the list. Pick the location from combo box then Shift+R
+ [*] Adjust player jump power then hold E+R to apply jump power on yourself
+ [*] Updated in tone with GM13 with no `deprecated` API calls
+ [*] Pressing reload on an entity brings it back to you
+ [*] Apply force at entity mass center or its hit position
+ [*] Store local player location for re-visit
+ [*] Data synchronization using net.* messages
+ [*] Utilize translation hashes instead of constant strings
+ [*] Force dropping with trace distance (When distance is greater than zero)
+ [*] Force growing with trace distance (When checkbox is selected for reverse)
+ [*] Force can be multiplied by prop's mass to equalize the effect
+ [*] Displays the world coordinate system (No need for spray orientation)
+ [*] Displays props coordinate system (No wonder when creating ball sockets)
+ [*] Displays mass center extracted from server-side trace entity
+ [*] Displays trace entity position and OBB center
+ [*] Positioning radius when bigger you will less likely be stuck in a wall (Press V to escape)
+ [*] Default values for all the sliders are available (Press middle mouse on slider notch)
+[/list]
+
+Reuploading and source stealing will not be tolerated!
+Selling it is also out of option, as the open source suggests!
+
+If you want to support me and you like what I do:
+
+paypal.me/DeyanVasilev

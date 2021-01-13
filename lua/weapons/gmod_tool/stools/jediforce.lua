@@ -6,6 +6,7 @@ TOOL.LeftClickAutomatic  = true
 TOOL.RightClickAutomatic = true
 TOOL.ClientConVar =
 {
+  [ "envelocity"   ] = 0  ,
   [ "movemap"      ] = 0  ,
   [ "mcapply"      ] = 0  ,
   [ "enablecs"     ] = 1  ,
@@ -14,6 +15,7 @@ TOOL.ClientConVar =
   [ "axislen"      ] = 30 ,
   [ "jumpower"     ] = 200,
   [ "storeposkey"  ] = "" ,
+  [ "radiuspos"    ] = 50 ,
   [ "force"        ] = 500,
   [ "distance"     ] = 500
 }
@@ -49,6 +51,10 @@ function GetJediInfo(oPly, bDel)
   end; return tPly, oPly
 end
 
+function TOOL:GetEnableVelocity()
+  return ((tonumber(self:GetClientNumber("envelocity", 0)) or 0) ~= 0)
+end
+
 function TOOL:GetDistReverse()
   return ((tonumber(self:GetClientNumber("distreverse", 0)) or 0) ~= 0)
 end
@@ -79,6 +85,10 @@ end
 
 function TOOL:GetAxisSize()
   return math.Clamp((tonumber(self:GetClientNumber("axislen", 0)) or 0), 0, 500)
+end
+
+function TOOL:GetRadiusPos()
+  return math.Clamp((tonumber(self:GetClientNumber("radiuspos", 0)) or 0), 0, 300)
 end
 
 function TOOL:ApplyJediForce(stTr, vVec)
@@ -130,6 +140,10 @@ if(CLIENT) then
   language.Add("tool."..gsToolName..".mcapply_con", "Apply force at the masscentre")
   language.Add("tool."..gsToolName..".movemap", "Enable this to allow moving map props with mind power")
   language.Add("tool."..gsToolName..".movemap_con", "Enable moving map props")
+  language.Add("tool."..gsToolName..".radiuspos", "Adjust this to change the distane player is places from world surfaces")
+  language.Add("tool."..gsToolName..".radiuspos_con", "Position radius")
+  language.Add("tool."..gsToolName..".envelocity", "Enable this to keep the player last velocity when teleporting")
+  language.Add("tool."..gsToolName..".envelocity_con", "Enable player velocity")
   language.Add("tool."..gsToolName..".storeposkey_ls", "Different recall location names are stored here")
   language.Add("tool."..gsToolName..".storeposkey_ls_def", "<CHOSE LOCATION>")
   language.Add("tool."..gsToolName..".storeposkey_ls_con", "Location memory")
@@ -248,8 +262,9 @@ function TOOL:Reload(tr)
   if(trEnt and trEnt:IsValid()) then
     local movemap = self:GetMoveMap()
     if(not movemap and trEnt:GetClass() ~= "prop_physics") then return end
+    local radiuspos = self:GetRadiusPos()
     local vAim = ply:GetAimVector(); vAim.z = 0 -- Dont grab over you
-    if(vAim:Length() < 55) then vAim:Mul(55 / vAim:Length()) end
+    if(vAim:Length() < radiuspos) then vAim:Mul(radiuspos / vAim:Length()) end
     trEnt:SetPos(ply:GetPos() + vAim + Vector(0, 0, 45))
     return true -- Place the prop in radius of 55 gmu
   elseif(tr.HitWorld) then
@@ -261,18 +276,22 @@ function TOOL:Reload(tr)
       local tPos = tPly.MovePos[storeposkey]
       local nX, nY, nZ = tPos[cvX], tPos[cvY], tPos[cvZ]
       if(nX and nY and nZ) then
-        ply:SetVelocity(-ply:GetVelocity())
+        if(not self:GetEnableVelocity()) then
+          ply:SetVelocity(-ply:GetVelocity())
+        end
         ply:SetPos(Vector(nX, nY, nZ))
         return true
-      end
+      end; return false
     elseif(use) then
       ply:SetJumpPower(self:GetJumpAmount()); return true
-    elseif(not spd and not use) then
-      ply:SetVelocity(-ply:GetVelocity())
-      ply:SetPos(tr.HitPos + 20 * tr.HitNormal)
+    else
+      local radiuspos = self:GetRadiusPos()
+      if(not self:GetEnableVelocity()) then
+        ply:SetVelocity(-ply:GetVelocity())
+      end
+      ply:SetPos(tr.HitPos + radiuspos * tr.HitNormal)
       return true
     end
-    return true
   end
   return false
 end
@@ -358,13 +377,19 @@ function TOOL.BuildCPanel(cPanel) local pItem, pComb, pText
 
   pItem = cPanel:NumSlider(language.GetPhrase("tool."..gsToolName..".distance_con"), gsToolName.."_distance", 0, 100000, 3)
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".distance"))
+          pItem:SetDefaultValue(gtConvarList[gsToolName.."_distance"])
   pItem = cPanel:NumSlider(language.GetPhrase("tool."..gsToolName..".force_con"), gsToolName.."_force", 0, 100000, 3)
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".force"))
+          pItem:SetDefaultValue(gtConvarList[gsToolName.."_force"])
   pItem = cPanel:NumSlider(language.GetPhrase("tool."..gsToolName..".axislen_con"), gsToolName.."_axislen", 0, 500, 3)
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".axislen"))
+          pItem:SetDefaultValue(gtConvarList[gsToolName.."_axislen"])
   pItem = cPanel:NumSlider(language.GetPhrase("tool."..gsToolName..".jumpower_con"), gsToolName.."_jumpower", 0, 10000, 3)
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".jumpower"))
-          pItem:SetDefaultValue(gtConvarList[gsToolName.."_jumpower"]) -- Default value for the player jump power
+          pItem:SetDefaultValue(gtConvarList[gsToolName.."_jumpower"])
+  pItem = cPanel:NumSlider(language.GetPhrase("tool."..gsToolName..".radiuspos_con"), gsToolName.."_radiuspos", 0, 300, 3)
+          pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".radiuspos"))
+          pItem:SetDefaultValue(gtConvarList[gsToolName.."_radiuspos"])
   pItem = cPanel:CheckBox (language.GetPhrase("tool."..gsToolName..".massrelative_con"), gsToolName.."_massrelative")
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".massrelative"))
   pItem = cPanel:CheckBox (language.GetPhrase("tool."..gsToolName..".distreverse_con"), gsToolName.."_distreverse")
@@ -373,4 +398,6 @@ function TOOL.BuildCPanel(cPanel) local pItem, pComb, pText
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".mcapply"))
   pItem = cPanel:CheckBox (language.GetPhrase("tool."..gsToolName..".movemap_con"), gsToolName.."_movemap")
           pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".movemap"))
+  pItem = cPanel:CheckBox (language.GetPhrase("tool."..gsToolName..".envelocity_con"), gsToolName.."_envelocity")
+          pItem:SetTooltip(language.GetPhrase("tool."..gsToolName..".envelocity"))
 end
