@@ -91,6 +91,10 @@ function TOOL:GetRadiusPos()
   return math.Clamp((tonumber(self:GetClientNumber("radiuspos", 0)) or 0), 0, 300)
 end
 
+function TOOL:GetStorePosKey()
+  return (self:GetClientInfo("storeposkey") or "")
+end
+
 function TOOL:ApplyJediForce(stTr, vVec)
   local oEnt = stTr.Entity
   if(oEnt and oEnt:IsValid()) then
@@ -213,28 +217,28 @@ function TOOL:DrawHUD()
         local Y = (vPos - axislen * oEnt:GetRight()):ToScreen()
         local Z = (vPos + axislen * oEnt:GetUp()):ToScreen()
         surface.SetDrawColor(255,0,0,255)
-        surface.DrawLine( O.x, O.y, X.x, X.y )
+        surface.DrawLine(O.x, O.y, X.x, X.y)
         surface.SetDrawColor(0,255,0,255)
-        surface.DrawLine( O.x, O.y, Y.x, Y.y )
+        surface.DrawLine(O.x, O.y, Y.x, Y.y)
         surface.SetDrawColor(0,0,255,255)
-        surface.DrawLine( O.x, O.y, Z.x, Z.y )
-        surface.DrawCircle( O.x, O.y, nRad, Color(255,0,255,255) )
-        surface.DrawCircle( B.x, B.y, nRad, Color(0,255,255,255) )
-        surface.DrawCircle( M.x, M.y, nRad, Color(255,255,0,255) )
+        surface.DrawLine(O.x, O.y, Z.x, Z.y)
+        surface.DrawCircle(O.x, O.y, nRad, Color(255,0,255,255))
+        surface.DrawCircle(B.x, B.y, nRad, Color(0,255,255,255))
+        surface.DrawCircle(M.x, M.y, nRad, Color(255,255,0,255))
       elseif(oEnt:IsWorld()) then
         local vPos = stTr.HitPos
         local nRad = self:GetPosRadius(oPly, vPos, axislen)
         local O = vPos:ToScreen()
-        local X = (vPos + axislen*Vector(1,0,0)):ToScreen()
-        local Y = (vPos + axislen*Vector(0,1,0)):ToScreen()
-        local Z = (vPos + axislen*Vector(0,0,1)):ToScreen()
+        local X = (vPos + axislen * Vector(1,0,0)):ToScreen()
+        local Y = (vPos + axislen * Vector(0,1,0)):ToScreen()
+        local Z = (vPos + axislen * Vector(0,0,1)):ToScreen()
         surface.SetDrawColor(255,0,0,255)
-        surface.DrawLine( O.x, O.y, X.x, X.y )
+        surface.DrawLine(O.x, O.y, X.x, X.y)
         surface.SetDrawColor(0,255,0,255)
-        surface.DrawLine( O.x, O.y, Y.x, Y.y )
+        surface.DrawLine(O.x, O.y, Y.x, Y.y)
         surface.SetDrawColor(0,0,255,255)
-        surface.DrawLine( O.x, O.y, Z.x, Z.y )
-        surface.DrawCircle( O.x, O.y, nRad, Color(255,0,255,255) )
+        surface.DrawLine(O.x, O.y, Z.x, Z.y)
+        surface.DrawCircle(O.x, O.y, nRad, Color(255,0,255,255))
       end
     end
   end
@@ -257,8 +261,8 @@ end
 function TOOL:Reload(tr)
   if(CLIENT) then return end
   if(not tr) then return end
-  local ply = self:GetOwner()
   local trEnt = tr.Entity
+  local ply = self:GetOwner()
   if(trEnt and trEnt:IsValid()) then
     local movemap = self:GetMoveMap()
     if(not movemap and trEnt:GetClass() ~= "prop_physics") then return end
@@ -271,9 +275,9 @@ function TOOL:Reload(tr)
     local tPly = GetJediInfo(ply)
     local use = ply:KeyDown(IN_USE)
     local spd = ply:KeyDown(IN_SPEED)
-    local storeposkey = (self:GetClientInfo("storeposkey") or "")
-    if(spd and storeposkey:len() > 0 and tPly.MovePos[storeposkey]) then
-      local tPos = tPly.MovePos[storeposkey]
+    local key = self:GetStorePosKey()
+    if(spd and key:len() > 0 and tPly.MovePos[key]) then
+      local tPos = tPly.MovePos[key]
       local nX, nY, nZ = tPos[cvX], tPos[cvY], tPos[cvZ]
       if(nX and nY and nZ) then
         if(not self:GetEnableVelocity()) then
