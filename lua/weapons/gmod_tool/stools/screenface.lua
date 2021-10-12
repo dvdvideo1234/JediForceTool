@@ -73,10 +73,10 @@ function TOOL:RightClick(tr)
   if(not tr.Hit) then return end
   local ply = self:GetOwner()
   if(ply:KeyDown(IN_SPEED)) then
-    local strvc = tostring(tr.HitPos)
-    Notify(ply, "Position: ["..strvc.."]", "GENERIC")
-    print("Position: "..strvc)
-    ply:ConCommand(gsTool.."_position \""..strvc.."\"\n")
+    local value = tostring(tr.HitPos)
+    Notify(ply, "Position: ["..value.."]", "GENERIC")
+    print("MP Extended - Position:", "["..value.."]")
+    ply:ConCommand(gsTool.."_position \""..value.."\"\n")
   else
     local up = Vector(0,0,1)
     local dt = tr.HitNormal:Dot(up)
@@ -86,11 +86,10 @@ function TOOL:RightClick(tr)
       return false
     end
     local angle = tr.HitNormal:AngleEx(Vector(0,0,1))
-    local value = tr.Entity:WorldToLocalAngles(angle)
-    local strvc = tostring(value)
-    print("Custiom angle: " ..strvc)
-    Notify(ply, "Custiom angle: ["..strvc.."]", "GENERIC")
-    ply:ConCommand(gsTool.."_angle \""..strvc.."\"\n")
+    local value = tostring(tr.Entity:WorldToLocalAngles(angle))
+    print("MP Extended - Angle:", "["..value.."]")
+    Notify(ply, "Custiom angle: ["..value.."]", "GENERIC")
+    ply:ConCommand(gsTool.."_angle \""..value.."\"\n")
   end
   return true
 end
