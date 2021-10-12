@@ -42,17 +42,17 @@ end
 local function SetFacePlayer(ply, ent, nrm, pos, ang)
   if(not (ent and ent:IsValid())) then return end
   local norm, epos = Vector(nrm), ent:GetPos()
-        norm:Normalize() -- Make sure it is normalized
+  norm:Normalize() -- Make sure it is normalized
   local cang = (ang and Angle(ang) or Angle(0,0,0))
   local righ = (pos - ply:GetPos()):Cross(norm)
   local rang = norm:Cross(righ):AngleEx(norm)
   local tang = ent:AlignAngles(ent:LocalToWorldAngles(cang), rang)
-        tang:Normalize(); tang:RotateAroundAxis(norm, 180)
+  tang:Normalize(); tang:RotateAroundAxis(norm, 180)
   ent:SetAngles(tang) -- Apply the angle as long as it is ready
   local vobb = ent:OBBCenter() -- Revert OBB to position
-        vobb.x, vobb.y, vobb.z = -vobb.x, -vobb.y, -vobb.z
+  vobb.x, vobb.y, vobb.z = -vobb.x, -vobb.y, -vobb.z
   local marg = GetOffsetUP(ent, ent:WorldToLocal(norm + epos))
-        vobb:Rotate(tang); vobb:Add(norm * marg)
+  vobb:Rotate(tang); vobb:Add(norm * marg)
   local tpos = Vector(vobb); tpos:Add(pos) -- Use OBB offset
   ent:SetPos(tpos) -- Apply the calculated position
 end
